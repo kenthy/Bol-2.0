@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<manifest>
+    <id>a93cf871532baa2b8eec38f9fa5b6ed7</id>
+    <name>Pulsefire Master Yi</name>
+    <type>ADDON</type>
+    <version>1.0.0</version>
+    <author>Woody</author>
+    <description>
+
+    Pulsefire Master Yi
+    	
+    	Smart Combo
+			- Fully Configurable
+			- Orbwalking (SxOrbWalk)
+
+		Kill Steal
+			- Option to use Q
+
+		Lane Clear
+			- Option to use Q
+
+		Drawings
+
+			- Abilities
+			- Items
+
+    </description>
+    <requirements>SxOrbWalk</requirements>
+</manifest>

@@ -1,0 +1,244 @@
+local AArange, Qrange = 125, 600, 425, 1000
+local Qtarget = nil
+
+Callback.Bind('Load', function()
+	
+	Callback.Bind('GameStart', function() OnGameStart() end)
+
+end)
+
+function OnGameStart()
+    if myHero.charName ~= 'MasterYi' then return end
+
+    Color = { Red = Graphics.ARGB(0xFF,0xFF,0,0),
+            Green = Graphics.ARGB(0xFF,0,0xFF,0),
+            Blue = Graphics.ARGB(0xFF,0,0,0xFF),
+            White = Graphics.ARGB(0xFF,0xFF,0xFF,0xFF)
+            }
+
+	Yi = AddonConfig('Pulsefire Master Yi') {
+        Combo = AddonConfig.Menu('Combo') {
+            Combo = AddonConfig.Section("Abilities Config") {
+                Quse = AddonConfig.Boolean("Use Q - Alpha Strike", true),
+                --Wuse = AddonConfig.Boolean("Use W - Meditate", false), 
+                Euse = AddonConfig.Boolean("Use E - Wuju Style", true), 
+                Ruse = AddonConfig.Boolean("Use R - Highlander", false),
+                },      
+        },
+        Farm = AddonConfig.Menu('Farm Settings') {
+            LaneClear = AddonConfig.Section("Lane Clear") {
+                Quse = AddonConfig.Boolean("Use Q - Alpha Strike", true), 
+                --Euse = AddonConfig.Boolean("Use E - Wuju Style", false), 
+            },
+        },
+        Ks = AddonConfig.Menu('Kill Steal') {
+            Ks = AddonConfig.Section("Settings") {
+                Quse = AddonConfig.Boolean(" Use Q - Alpha Strike", true),
+            }
+        },
+		Draw = AddonConfig.Menu('Draw Settings') {
+            Enable = AddonConfig.Boolean("Enable Drawings", true), 
+                Abilities = AddonConfig.Section("Abilities Range") {
+                    Qdraw = AddonConfig.Boolean("Q - Alpha Strike", true), 
+            },
+            Items = AddonConfig.Section("Items Range") {
+                Bilgewater = AddonConfig.Boolean("Bilgewater Cutlass", false),
+                Botrk = AddonConfig.Boolean("Blade of the Ruined King", false),
+                Tiamat = AddonConfig.Boolean("Tiamat", false),
+                Hydra = AddonConfig.Boolean("Ravenous Hydra", false), 
+                --Randuins = AddonConfig.Boolean("Randuin's Omen", false), 
+            },--[[
+            Colors = AddonConfig.Section("Colors") {
+                Colors = AddonConfig.Number("Colors(White, Blue, Red, Green) ", 1),
+            },]]
+        },
+        Keys = AddonConfig.Section("Keys") {
+                AutoCarry = AddonConfig.KeyBinding('Combo', 'SPACE'),
+                MixedMode = AddonConfig.KeyBinding('Harass', 'C'),
+                LaneClear = AddonConfig.KeyBinding('LaneClear', 'V'),
+                LastHit = AddonConfig.KeyBinding('LastHit', 'X'),
+        }
+	}
+
+    Game.Chat.Print("<b>Pulsefire Master Yi: </b><font color=\"#CFCDCD\">Version 1.0 loaded</b></font>")
+
+	Callback.Bind('Draw', function() OnDraw() end)
+	Callback.Bind('Tick', function() OnTick() end)
+    --Callback.Bind('Exit', function() OnExit() end)
+
+
+end
+
+function OnTick()
+    Checks()
+    Ks()
+    LClear()
+
+    Qtarget = GetBestTarget(Qrange)
+    SxOrb:EnableAttacks()
+    SxOrb:ForceTarget(Qtarget)
+
+    Target = SxOrb:GetTarget()
+ 
+    if AutoCarry then
+        if Qtarget ~= nil then
+            UseQ(Qtarget)
+        end
+        if Target ~= nil then
+            Combo(Target)
+        end
+    end
+
+end
+
+function Combo(unit)
+
+    if SxOrb:ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
+        if Qcombo and myHero:DistanceTo(unit) < AArange and Qready then
+            if Eready then
+                myHero:CastSpell(2)
+                SxOrb:ResetAA()
+                myHero:CastSpell(0, unit)
+            else
+                SxOrb:ResetAA()
+                myHero:CastSpell(0, unit)
+            end
+        end
+        if Rcombo and myHero:DistanceTo(unit) <= AArange and Rready then
+            SxOrb:ResetAA()  
+            myHero:CastSpell(3)
+        end
+        if not Qready and not Wready and not Rready and myHero:DistanceTo(unit) <= AArange then
+            SxOrb:ResetAA()  
+            myHero:CastSpell(2)
+        end
+    end
+
+end
+
+function UseQ(unit)
+
+    if Qcombo and myHero:DistanceTo(unit) < Qrange and Qready then
+        if Eready then
+            myHero:CastSpell(0, unit)
+            myHero:CastSpell(2)
+        else
+            myHero:CastSpell(0, unit)
+        end
+    end
+    if Rcombo and myHero:DistanceTo(unit) < 650 and myHero:DistanceTo(unit) > AArange and Rready then
+            myHero:CastSpell(3)
+    end
+end
+
+function LClear()
+
+    if ((Yi.Farm.LaneClear.Quse:Value()) and LaneClear) then
+        for minion in Object.Minions do
+            local Qdmg = myHero:CalcDamage(minion, ((35 * myHero:GetSpellData(0).level)) + myHero.totalDamage)
+            if minion.health < myHero.CalcDamage(myHero, minion, Qdmg) and minion.health > 0 and Qready and myHero:DistanceTo(minion) < Qrange then
+                myHero:CastSpell(0, minion)
+            end
+        end
+    end
+
+end
+
+function Ks()
+
+    for i = 0, Game.HeroCount() do
+        unit = Game.Hero(i)
+        local Qdmg = myHero:CalcDamage(unit, (((35 * myHero:GetSpellData(0).level) - 10 ) + myHero.totalDamage))
+        if unit.team ~= myHero.team and myHero:DistanceTo(unit) < Qrange then
+            if unit.health <= Qdmg and Qready and QKs then
+                myHero:CastSpell(0, unit)
+            end
+        end
+    end
+
+end
+
+-- Honda7 --
+function GetBestTarget(Range)
+    local LessToKill = 100
+    local LessToKilli = 0
+    local target = nil
+    --  LESS_CAST
+    for i = 0, Game.HeroCount() do
+        unit = Game.Hero(i)
+        if unit.team ~= myHero.team and myHero:DistanceTo(unit) < Qrange then
+            local DamageToHero = myHero:CalcDamage(unit, (((30 * myHero:GetSpellData(0).level) - 10 ) + myHero.totalDamage))
+            local ToKill = unit.health / DamageToHero
+            if (ToKill < LessToKill) or (LessToKilli == 0) then
+                LessToKill = ToKill
+                LessToKilli = i
+            end 
+        end
+    end
+
+    if LessToKilli ~= 0 then
+        for i = 0, Game.HeroCount() do
+            unit = Game.Hero(i)
+            if i == LessToKilli then
+                target = unit
+            end
+        end
+    end
+    return target
+end
+
+function Checks()
+    
+    Qready = (myHero:CanUseSpell(0) == 0)
+    Wready = (myHero:CanUseSpell(1) == 0)
+    Eready = (myHero:CanUseSpell(2) == 0)
+    Rready = (myHero:CanUseSpell(3) == 0)
+
+    Qcombo = Yi.Combo.Combo.Quse:Value()
+    --Wcombo = Yi.Combo.Combo.Wuse:Value()
+    Ecombo = Yi.Combo.Combo.Euse:Value()
+    Rcombo = Yi.Combo.Combo.Ruse:Value()
+
+    QKs = Yi.Ks.Ks.Quse:Value()
+
+    AutoCarry = Keyboard.KeysDown(Yi.Keys.AutoCarry:Value())
+    MixedMode = Keyboard.KeysDown(Yi.Keys.MixedMode:Value())
+    LaneClear = Keyboard.KeysDown(Yi.Keys.LaneClear:Value())
+    LastHit = Keyboard.KeysDown(Yi.Keys.LastHit:Value())
+
+    --[[
+    if (Yi.Draw.Colors.Colors:Value()) == 1 then
+        DrawColor = Color.White
+    end
+    if (Yi.Draw.Colors.Colors:Value()) == 2 then
+        DrawColor = Color.Blue
+    end
+    if (Yi.Draw.Colors.Colors:Value()) == 3 then
+        DrawColor = Color.Red
+    end
+    if (Yi.Draw.Colors.Colors:Value()) == 4 then
+        DrawColor = Color.Green
+    end ]]
+
+end
+
+function OnDraw()
+
+    if Yi.Draw.Enable:Value() then
+        -- Abilities --
+        if (Yi.Draw.Abilities.Qdraw:Value()) and Qready then
+            Graphics.DrawCircle(myHero, Qrange, Color.White)
+        end
+        -- Items --
+        if (Yi.Draw.Items.Bilgewater:Value()) or (Yi.Draw.Items.Botrk:Value()) then
+            Graphics.DrawCircle(myHero, 450, Color.White)
+        end
+        if (Yi.Draw.Items.Tiamat:Value()) or (Yi.Draw.Items.Hydra:Value()) then
+            Graphics.DrawCircle(myHero, 400, Color.White)
+        end
+        --[[
+        if (Yi.Draw.Items.Randuins:Value()) then
+            Graphics.DrawCircle(myHero, 500, Color.White)
+        end]]
+    end
+end
