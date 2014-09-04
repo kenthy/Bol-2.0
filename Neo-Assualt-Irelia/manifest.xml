@@ -1,12 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <manifest>
     <id>38b5434f63435bc2ac73902fc51b6a85</id>
-    <icon>/resource/cloudrop.gui/images/drop.png</icon>
     <name>Neo Assualt Irelia</name>
     <type>ADDON</type>
     <version>1.0.0</version>
     <author>Woody</author>
     <description></description>
-    <builtin>false</builtin>
     <requirements>SxOrbWalk</requirements>
 </manifest>

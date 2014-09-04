@@ -28,20 +28,25 @@ function OnGameStart()
         Farm = AddonConfig.Menu('Farm Settings') {
             LastHit = AddonConfig.Section("Last Hit") {
                 Quse = AddonConfig.Boolean("Use Q - Bladesurge", true), 
-                Euse = AddonConfig.Boolean("Use E - Equilibrium Strike", false), 
+                --Euse = AddonConfig.Boolean("Use E - Equilibrium Strike", false), 
             },
             LaneClear = AddonConfig.Section("Lane Clear") {
                 Quse = AddonConfig.Boolean("Use Q - Bladesurge", true),
-                Wuse = AddonConfig.Boolean("Use W - Hiten Style", false), 
-                Euse = AddonConfig.Boolean("Use E - Equilibrium Strike", false), 
-                Ruse = AddonConfig.Boolean("Use R - Transcendent Blades", true), 
+                --Wuse = AddonConfig.Boolean("Use W - Hiten Style", false), 
+                --Euse = AddonConfig.Boolean("Use E - Equilibrium Strike", false), 
+                --Ruse = AddonConfig.Boolean("Use R - Transcendent Blades", true), 
             },
         },
-		Draw = AddonConfig.Menu('Draw-Settings') {
-            Abilities = AddonConfig.Section("Abilities Range") {
-                Qdraw = AddonConfig.Boolean("Q - Bladesurge", false), 
-                Edraw = AddonConfig.Boolean("E - Equilibrium Strike", false),
-                Rdraw = AddonConfig.Boolean("R - Transcendent Blades", false), 
+        Ks = AddonConfig.Menu('Kill Steal') {
+            Quse = AddonConfig.Boolean("Q - Bladesurge", true),
+            Euse = AddonConfig.Boolean("E - Equilibrium Strike", false),
+        },
+		Draw = AddonConfig.Menu('Draw Settings') {
+            Enable = AddonConfig.Boolean("Enable Drawings", true), 
+                Abilities = AddonConfig.Section("Abilities Range") {
+                    Qdraw = AddonConfig.Boolean("Q - Bladesurge", false), 
+                    Edraw = AddonConfig.Boolean("E - Equilibrium Strike", false),
+                    Rdraw = AddonConfig.Boolean("R - Transcendent Blades", false), 
             },
             Items = AddonConfig.Section("Items Range") {
                 Bilgewater = AddonConfig.Boolean("Bilgewater Cutlass", false),
@@ -50,9 +55,12 @@ function OnGameStart()
                 Hydra = AddonConfig.Boolean("Ravenous Hydra", false), 
                 Randuins = AddonConfig.Boolean("Randuin's Omen", false), 
             },
+            Colors = AddonConfig.Section("Colors") {
+                Colors = AddonConfig.Number("Colors(White, Blue, Red, Green) ", 1),
+            },
         },
         Keys = AddonConfig.Section("Keys") {
-                AutoCarry = AddonConfig.KeyBinding('Combo', 'TAB'),
+                AutoCarry = AddonConfig.KeyBinding('Combo', 'SPACE'),
                 MixedMode = AddonConfig.KeyBinding('Harass', 'C'),
                 LaneClear = AddonConfig.KeyBinding('LaneClear', 'V'),
                 LastHit = AddonConfig.KeyBinding('LastHit', 'X'),
@@ -69,6 +77,7 @@ end
 
 function OnTick()
     Checks()
+    Ks()
 
     Qtarget = GetBestTarget(Qrange)
     SxOrb:EnableAttacks()
@@ -166,6 +175,29 @@ function UseR(unit)
 
 end
 
+function Ks()
+
+    for i = 0, Game.HeroCount() do
+        unit = Game.Hero(i)
+        local Qdmg = myHero:CalcDamage(unit, (((30 * myHero:GetSpellData(0).level) - 10 ) + myHero.totalDamage))
+        local Edmg = myHero:CalcDamage(unit, (((30 * myHero:GetSpellData(0).level) - 10 ) + myHero.totalDamage))
+        if unit.team ~= myHero.team and myHero:DistanceTo(unit) < Qrange then
+            if unit.health <= Qdmg + Edmg and Qready and Eready and QKs and EKs then
+                myHero:CastSpell(0, unit)
+                myHero:CastSpell(2, unit)
+            end
+            if unit.health <= Qdmg and Qready and QKs then
+                myHero:CastSpell(0, unit)
+            end
+            if unit.health <= Edmg and myHero:DistanceTo(unit) < Erange and Eready and EKS then
+                myHero:CastSpell(2, unit)
+            end
+        end
+    end
+
+end
+
+
 -- Honda7 --
 function GetBestTarget(Range)
     local LessToKill = 100
@@ -174,9 +206,9 @@ function GetBestTarget(Range)
     --  LESS_CAST
     for i = 0, Game.HeroCount() do
         unit = Game.Hero(i)
-        if unit.team ~= myHero.team and myHero:DistanceTo(unit) < 650 then
-            DamageToHero = myHero:CalcDamage(unit, (((30 * myHero:GetSpellData(0).level) - 10 ) + myHero.totalDamage))
-            ToKill = unit.health / DamageToHero
+        if unit.team ~= myHero.team and myHero:DistanceTo(unit) < Qrange then
+            local DamageToHero = myHero:CalcDamage(unit, (((30 * myHero:GetSpellData(0).level) - 10 ) + myHero.totalDamage))
+            local ToKill = unit.health / DamageToHero
             if (ToKill < LessToKill) or (LessToKilli == 0) then
                 LessToKill = ToKill
                 LessToKilli = i
@@ -207,32 +239,49 @@ function Checks()
     Ecombo = Irelia.Combo.Combo.Euse:Value()
     Rcombo = Irelia.Combo.Combo.Ruse:Value()
 
+    QKs = Irelia.Ks.Quse:Value()
+    EKs = Irelia.Ks.Euse:Value()
+
     AutoCarry = Keyboard.KeysDown(Irelia.Keys.AutoCarry:Value())
     MixedMode = Keyboard.KeysDown(Irelia.Keys.MixedMode:Value())
     LaneClear = Keyboard.KeysDown(Irelia.Keys.LaneClear:Value())
     LastHit = Keyboard.KeysDown(Irelia.Keys.LastHit:Value())
 
+    --[[
+    if Irelia.Draw.Colors.Colors:Value() == 2 then
+        DrawColor = Color.Blue
+    elseif Irelia.Draw.Colors.Colors:Value() == 3 then
+        DrawColor = Color.Red
+    elseif Irelia.Draw.Colors.Colors:Value() == 4 then
+        DrawColor = Color.Green
+    else
+        DrawColor = Color.White
+    end ]]
+
 end
 
 function OnDraw()
-    -- Abilities --
-    if (Irelia.Draw.Abilities.Qdraw:Value()) then
-        Graphics.DrawCircle(myHero, Qrange, Color.White)
-    end
-    if (Irelia.Draw.Abilities.Edraw:Value()) then
-        Graphics.DrawCircle(myHero, Erange, Color.White)
-    end
-    if (Irelia.Draw.Abilities.Rdraw:Value()) then
-        Graphics.DrawCircle(myHero, Rrange, Color.White)
-    end
-    -- Items --
-    if (Irelia.Draw.Items.Bilgewater:Value()) or (Irelia.Draw.Items.Botrk:Value()) then
-        Graphics.DrawCircle(myHero, 450, Color.White)
-    end
-    if (Irelia.Draw.Items.Tiamat:Value()) or (Irelia.Draw.Items.Hydra:Value()) then
-        Graphics.DrawCircle(myHero, 400, Color.White)
-    end
-    if (Irelia.Draw.Items.Randuins:Value()) then
-        Graphics.DrawCircle(myHero, 500, Color.White)
+
+    if Irelia.Draw.Enable:Value() then
+        -- Abilities --
+        if (Irelia.Draw.Abilities.Qdraw:Value()) then
+            Graphics.DrawCircle(myHero, Qrange, Color.Green)
+        end
+        if (Irelia.Draw.Abilities.Edraw:Value()) then
+            Graphics.DrawCircle(myHero, Erange, Color.Green)
+        end
+        if (Irelia.Draw.Abilities.Rdraw:Value()) then
+            Graphics.DrawCircle(myHero, Rrange, Color.Green)
+        end
+        -- Items --
+        if (Irelia.Draw.Items.Bilgewater:Value()) or (Irelia.Draw.Items.Botrk:Value()) then
+            Graphics.DrawCircle(myHero, 450, Color.Green)
+        end
+        if (Irelia.Draw.Items.Tiamat:Value()) or (Irelia.Draw.Items.Hydra:Value()) then
+            Graphics.DrawCircle(myHero, 400, Color.Green)
+        end
+        if (Irelia.Draw.Items.Randuins:Value()) then
+            Graphics.DrawCircle(myHero, 500, Color.Green)
+        end
     end
 end
