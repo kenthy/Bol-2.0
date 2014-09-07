@@ -3,8 +3,26 @@
     <id>34f7e3a31179d077c1678a85ad1953ca</id>
     <name>Bat Vayne</name>
     <type>ADDON</type>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <author>Woody</author>
-    <description></description>
+    <description>
+    	Bat Vayne
+
+    		Combo
+				- Use Q
+				- Orbwalking (SxOrbWalk)
+
+			Condemn
+				- On Key down
+				- Toggle option
+
+			Misc
+				- Q - Tumble over the Wall near Drake
+
+			Drawings
+				- Abilities
+				- Items
+
+    </description>
     <requirements></requirements>
 </manifest>

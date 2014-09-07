@@ -61,7 +61,7 @@ function OnGameStart()
         
         
 
-    Game.Chat.Print("<font color=\"#E31919\"><b>Bat Vayne: </b></font><font color=\"#000000\">Version 1.0 loaded</b></font>")
+    Game.Chat.Print("<font color=\"#E31919\"><b>Bat Vayne: </b></font><font color=\"#000000\">Version 1.01 loaded</b></font>")
 
     Callback.Bind('Draw', function() OnDraw() end)
     Callback.Bind('Tick', function() OnTick() end)
@@ -76,7 +76,7 @@ function OnTick()
 
     Target = SxOrb:GetTarget()
     
-    if Keyboard.KeysDown(Vayne.Misc.Wall.Drake:Value()) or Keyboard.KeysDown(Vayne.Misc.Wall.Mid:Value()) then
+    if Keyboard.KeysDown(Vayne.Misc.Wall.Drake:Value()) then
         TumbleWall()
     end
     
@@ -166,9 +166,9 @@ function Checks()
     Rready = (myHero:CanUseSpell(3) == 0)
 
     Qcombo = Vayne.Combo.Combo.Quse:Value()
-    Rcombo = Vayne.Combo.Combo.Ruse:Value()
+    --Rcombo = Vayne.Combo.Combo.Ruse:Value()
 
-    QFarm = Vayne.Farm.LaneClear.Quse:Value()
+    --QFarm = Vayne.Farm.LaneClear.Quse:Value()
 
     AutoCarry = Keyboard.KeysDown(Vayne.Keys.AutoCarry:Value())
     MixedMode = Keyboard.KeysDown(Vayne.Keys.MixedMode:Value())
