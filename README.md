@@ -24,3 +24,26 @@ Bol 2.0
 <li>Items</li>
 </ul>
 </ul>
+
+![alt tag](http://i.imgur.com/zKYQNzQ.png)
+<p><strong>Pulsefire Master Yi</strong><a href="http://botoflegends.com/forum/topic/34762-scriptaddon-pulsefire-master-yi-04092014/" title="(Link)"> Link</a></p>
+<ul>
+<li>Smart Combo</li>
+<ul>
+<li>Fully Configurable</li>
+<li>Orbwalking (SxOrbWalk)</li>
+</ul>
+<li>Kill Steal</li>
+<ul>
+<li>Option to use Q</li>
+</ul>
+<li>Lane Clear</li>
+<ul>
+<li>Option to use Q</li>
+</ul>
+<li>Drawings</li>
+<ul>
+<li>Abilities</li>
+<li>Items</li>
+</ul>
+</ul>
