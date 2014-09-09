@@ -1,8 +1,8 @@
-Bol-2.0
+Bol 2.0
 =======
 
 ![alt tag](http://i.imgur.com/c7zDV7i.png)
-<p><strong>Neo Assault Irelia</strong><a href="http://example.com/" title="(Link)"> Link</a></p>
+<p><strong>Neo Assault Irelia</strong><a href="http://botoflegends.com/forum/topic/34715-scriptaddon-neo-assualt-irelia-04092014/" title="(Link)"> Link</a></p>
 <ul>
 <li>Combo</li>
 <ul>
