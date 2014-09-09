@@ -23,7 +23,7 @@ Bol 2.0
 <li>Items</li>
 </ul>
 </ul>
-
+<p></p>
 ![alt tag](http://i.imgur.com/zKYQNzQ.png)
 <p><strong>Pulsefire Master Yi</strong><a href="http://botoflegends.com/forum/topic/34762-scriptaddon-pulsefire-master-yi-04092014/" title="(Link)"> Link</a></p>
 <ul>
