@@ -7,9 +7,23 @@ Bol-2.0
 <ul>
 <li>Combo</li>
 <ul>
+<li>Use Q</li>
 <li>Orbwalking (SxOrbWalk)</li>
+</ul>
 <li>Condemn</li>
-/ul>
+<ul>
+<li>On Key down</li>
+<li>Toggle option</li>
+</ul>
+<li>Misc</li>
+<ul>
+<li>Q - Tumble over the Wall near Drake</li>
+</ul>
+<li>Drawings</li>
+<ul>
+<li>Abilities</li>
+<li>Items</li>
+</ul>
 </ul>
 
 
