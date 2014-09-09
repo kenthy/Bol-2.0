@@ -2,7 +2,7 @@ Bol-2.0
 =======
 
 ![alt tag](http://i.imgur.com/c7zDV7i.png)
-<h1>Neo Assault Irelia</h1>
+<h1><em>Neo Assault Irelia</em></h1>
 
 <ul>
 <li>Combo</li>
