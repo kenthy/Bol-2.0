@@ -1,5 +1,65 @@
 local AArange, Erange = 550, 550
 
+local spells = 
+    {
+        {name = "CaitlynAceintheHole", menuname = "Caitlyn (R)"},
+        {name = "Crowstorm", menuname = "Fiddlesticks (R)"},
+        {name = "DrainChannel", menuname = "Fiddlesticks (W)"},
+        {name = "GalioIdolOfDurand", menuname = "Galio (R)"},
+        {name = "KatarinaR", menuname = "Katarina (R)"},
+        {name = "InfiniteDuress", menuname = "WarWick (R)"},
+        {name = "AbsoluteZero", menuname = "Nunu (R)"},
+        {name = "MissFortuneBulletTime", menuname = "Miss Fortune (R)"},
+        {name = "AlZaharNetherGrasp", menuname = "Malzahar (R)"},
+        {name = "PantheonRJump", menuname = "Pantheon (R Cast)"},
+        {name = "PantheonRFall", menuname = "Pantheon (R Fall)"},
+        {name = "ShenStandUnited", menuname = "Shen (R)UrgotSwap2"},
+        {name = "UrgotSwap2", menuname = "Urgot (R)"},
+        {name = "VarusQ", menuname = "Varus (Q)"},
+        {name = "VelkozR", menuname = "Vel'Koz (R)"},
+        {name = "FallenOne", menuname = "Karthus (R)"},
+    }
+
+-- Thanks to Superx321 for the tables
+
+local GapCloserTarget = {
+        ['AkaliShadowDance']        = {true, Champ = 'Akali',       spellKey = 'R'},
+        ['Headbutt']                = {true, Champ = 'Alistar',     spellKey = 'W'},
+        ['DianaTeleport']           = {true, Champ = 'Diana',       spellKey = 'R'},
+        ['IreliaGatotsu']           = {true, Champ = 'Irelia',      spellKey = 'Q'},
+        ['JaxLeapStrike']           = {true, Champ = 'Jax',         spellKey = 'Q'},
+        ['JayceToTheSkies']         = {true, Champ = 'Jayce',       spellKey = 'Q'},
+        ['MaokaiUnstableGrowth']    = {true, Champ = 'Maokai',      spellKey = 'W'},
+        ['MonkeyKingNimbus']        = {true, Champ = 'MonkeyKing',  spellKey = 'E'},
+        ['Pantheon_LeapBash']       = {true, Champ = 'Pantheon',    spellKey = 'W'},
+        ['PoppyHeroicCharge']       = {true, Champ = 'Poppy',       spellKey = 'E'},
+        ['QuinnE']                  = {true, Champ = 'Quinn',       spellKey = 'E'},
+        ['XenZhaoSweep']            = {true, Champ = 'XinZhao',     spellKey = 'E'},
+        ['blindmonkqtwo']           = {true, Champ = 'LeeSin',      spellKey = 'Q'},
+        ['FizzPiercingStrike']      = {true, Champ = 'Fizz',        spellKey = 'Q'},
+        ['RengarLeap']              = {true, Champ = 'Rengar',      spellKey = 'Q/R'},
+    }
+
+local GapCloserNoTarget = {
+        ['AatroxQ']                 = {true, Champ = 'Aatrox',      range = 1500,   projSpeed = 1200, spellKey = 'Q'},
+        ['GragasE']                 = {true, Champ = 'Gragas',      range = 600,    projSpeed = 2000, spellKey = 'E'},
+        ['GravesMove']              = {true, Champ = 'Graves',      range = 425,    projSpeed = 2000, spellKey = 'E'},
+        ['HecarimUlt']              = {true, Champ = 'Hecarim',     range = 1000,   projSpeed = 1200, spellKey = 'R'},
+        ['JarvanIVDragonStrike']    = {true, Champ = 'JarvanIV',    range = 770,    projSpeed = 2000, spellKey = 'Q'},
+        ['JarvanIVCataclysm']       = {true, Champ = 'JarvanIV',    range = 650,    projSpeed = 2000, spellKey = 'R'},
+        ['KhazixE']                 = {true, Champ = 'Khazix',      range = 900,    projSpeed = 2000, spellKey = 'E'},
+        ['khazixelong']             = {true, Champ = 'Khazix',      range = 900,    projSpeed = 2000, spellKey = 'E'},
+        ['LeblancSlide']            = {true, Champ = 'Leblanc',     range = 600,    projSpeed = 2000, spellKey = 'W'},
+        ['LeblancSlideM']           = {true, Champ = 'Leblanc',     range = 600,    projSpeed = 2000, spellKey = 'WMimic'},
+        ['LeonaZenithBlade']        = {true, Champ = 'Leona',       range = 900,    projSpeed = 2000, spellKey = 'E'},
+        ['UFSlash']                 = {true, Champ = 'Malphite',    range = 1000,   projSpeed = 1800, spellKey = 'R'},
+        ['RenektonSliceAndDice']    = {true, Champ = 'Renekton',    range = 450,    projSpeed = 2000, spellKey = 'E'},
+        ['SejuaniArcticAssault']    = {true, Champ = 'Sejuani',     range = 650,    projSpeed = 2000, spellKey = 'Q'},
+        ['ShenShadowDash']          = {true, Champ = 'Shen',        range = 575,    projSpeed = 2000, spellKey = 'E'},
+        ['RocketJump']              = {true, Champ = 'Tristana',    range = 900,    projSpeed = 2000, spellKey = 'W'},
+        ['slashCast']               = {true, Champ = 'Tryndamere',  range = 650,    projSpeed = 1450, spellKey = 'E'},
+    }
+
 Callback.Bind('Load', function()
     
     Callback.Bind('GameStart', function() OnGameStart() end)
@@ -17,51 +77,70 @@ function OnGameStart()
 
     Vayne = AddonConfig('Bat Vayne') {
         Combo = AddonConfig.Menu('Combo') {
-            Combo = AddonConfig.Section("Skills Config") {
+            Combo = AddonConfig.Section("Skills Config"),
                 Quse = AddonConfig.Boolean("Use Q - Tumble", true),
                 --Ruse = AddonConfig.Boolean("Use R - Final Hour", false),
-                },      
-        },
+            },            
+        
         Farm = AddonConfig.Menu('Farm') {
-            LaneClear = AddonConfig.Section("Lane Clear") {
-                --Quse = AddonConfig.Boolean("Use Q - Tumble", true), 
+            LaneClear = AddonConfig.Section("Lane Clear"), 
+                Quse = AddonConfig.Boolean("Use Q - Tumble", true), 
                 --Euse = AddonConfig.Boolean("Use E - Wuju Style", false), 
-            },
+            
         },
         Condemn = AddonConfig.Menu('Condemn') {
-            Settings = AddonConfig.Section("Settings") {
-               Condemn = AddonConfig.KeyBinding('Condemn', 'SPACE'),
-               Toggle = AddonConfig.Boolean("Auto-Condemn Toggle", true),
-            }
+            Settings = AddonConfig.Section("Settings") ,
+                Condemn = AddonConfig.KeyBinding('Condemn', 'SPACE'),
+                Toggle = AddonConfig.Boolean("Auto-Condemn Toggle", true),
+                
+                GapCloser =  AddonConfig.Boolean("Anti Gapcloser", true),
+            Heros = AddonConfig.Section("Use E on:"), 
+            
         },
-        Misc = AddonConfig.Menu('Misc') {
-            Wall = AddonConfig.Section("Wall Tumble") {
-               --Mid = AddonConfig.KeyBinding('Mid Wall Key', 'K'),
-               Drake = AddonConfig.KeyBinding('Drake Wall Key', 'L'),
-            }
-        },
-        Draw = AddonConfig.Menu('Drawing') {
-            Enable = AddonConfig.Boolean("Enable Drawings", true), 
-                Skills = AddonConfig.Section("Skills Range") {
-                    Edraw = AddonConfig.Boolean("E - Condemn", false),
-            },
-            Items = AddonConfig.Section("Items Range") {
-                Bilgewater = AddonConfig.Boolean("Bilgewater Cutlass", false),
-                Botrk = AddonConfig.Boolean("Blade of the Ruined King", false),
-            },
+
+        Interrupt = AddonConfig.Menu('Auto-Interrupt'){
+            Enable = AddonConfig.Boolean("Enabled", true),
+                Settings = AddonConfig.Section("Skill Settings"),
 
         },
-        Keys = AddonConfig.Section("Keys") {
+
+        Misc = AddonConfig.Menu('Misc') {
+            Wall = AddonConfig.Section("Wall Tumble"), 
+               --Mid = AddonConfig.KeyBinding('Mid Wall Key', 'K'),
+               Drake = AddonConfig.KeyBinding('Drake Wall Key', 'L'),
+            
+        },
+        Draw = AddonConfig.Menu('Drawing'){ 
+            Enable = AddonConfig.Boolean("Enable Drawings", true), 
+                Skills = AddonConfig.Section("Skills Range"), 
+                    Edraw = AddonConfig.Boolean("E - Condemn", false),
+            
+            Items = AddonConfig.Section("Items Range"), 
+                Bilgewater = AddonConfig.Boolean("Bilgewater Cutlass", false),
+                Botrk = AddonConfig.Boolean("Blade of the Ruined King", false),
+            
+
+        },
+        Keys = AddonConfig.Section("Keys"),
             AutoCarry = AddonConfig.KeyBinding('Combo', 'SPACE'),
             MixedMode = AddonConfig.KeyBinding('Harass', 'C'),
             LaneClear = AddonConfig.KeyBinding('LaneClear', 'V'),
             LastHit = AddonConfig.KeyBinding('LastHit', 'X'),
-            },
+            
         }
-        
-        
+    
+    for i, spell in pairs(spells) do
+        Vayne.Interrupt.Settings:Add(AddonConfig.Boolean(spell.menuname, true):Id(spell.name))
+    end
 
-    Game.Chat.Print("<font color=\"#E31919\"><b>Bat Vayne: </b></font><font color=\"#000000\">Version 1.01 loaded</b></font>")
+    for i = 1, Game.HeroCount() do
+      local hero = Game.Hero(i)
+        if hero.team == TEAM_ENEMY then    
+            Vayne.Condemn.Heros:Add(AddonConfig.Boolean(hero.charName, true):Id(hero.charName))
+        end
+    end
+
+    Game.Chat.Print("<font color=\"#E31919\"><b>Bat Vayne: </b></font><font color=\"#000000\">Version 1.02 loaded</b></font>")
 
     Callback.Bind('Draw', function() OnDraw() end)
     Callback.Bind('Tick', function() OnTick() end)
@@ -74,9 +153,9 @@ function OnTick()
     Checks()
     Condemn()
 
-    Target = SxOrb:GetTarget()
+    --Target = SxOrb:GetTarget()
     
-    if Keyboard.KeysDown(Vayne.Misc.Wall.Drake:Value()) then
+    if Keyboard.KeysDown(Vayne.Misc.Drake:Value()) then
         TumbleWall()
     end
     
@@ -84,16 +163,55 @@ end
 
 function OnProcessSpell(unit, spell)
 
-    local SpellT = spell.target
-    if unit.isMe and spell.name:lower():find("attack") then
-        if SpellT.type == myHero.type and AutoCarry and Qcombo then
+    if unit.isMe and spell.name:lower():find("attack") and AutoCarry and Qcombo then
+        local SpellT = spell.target
+        if SpellT.type == myHero.type then
             Utility.DelayAction(function() myHero:CastSpell(0, mousePos.x, mousePos.z) end, spell.windUpTime*1000 + Game.Latency())
         end
     end
 
-    --[[elseif LaneClear and Qfarm then
+    if Vayne.Interrupt.Enable:Value() and Eready then
+        if unit.team == TEAM_ENEMY and myHero:DistanceTo(unit) < Erange then
+            for i, spell in ipairs(spells) do
+                if Vayne.Interrupt.Settings[spell.name] then
+                    local name = spell.name
+                    for i = 1, #spells do
+                        if name == spells[i].name then
+                        myHero:CastSpell(2, unit)
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    --[[ if unit.isMe and spell.name:lower():find("attack") and LaneClear then
+        local SpellT = spell.target
+        if SpellT.type == myHero.type then
             Utility.DelayAction(function() myHero:CastSpell(0, mousePos.x, mousePos.z) end, spell.windUpTime*1000 + Game.Latency())
-        end]]
+        end
+    end]]
+
+    if Vayne.Condemn.GapCloser:Value() and Eready then
+        if unit.team == TEAM_ENEMY then
+            if GapCloserTarget[spell.name] and myHero:DistanceTo(unit) < Erange then
+                if spell.target and spell.target.name == myHero.name and Vayne.Condemn.Heros[unit.charName]:Value() then
+                    myHero:CastSpell(2, unit)
+                end
+            end
+            if GapCloserNoTarget[spell.name] and string.find(spell.name, "Basic") == nil then
+                if myHero:DistanceTo(spell.endPos) <= GapCloserNoTarget[spell.name].range then
+                    local startpos = (spell.startPos):To2D()
+                    local endpos = (spell.endPos):To2D()
+                    local v1 = (myHero.visionPos):To2D()
+                    local v2 = VectorPointProjectionOnLineSegment(startpos, endpos, v1)
+                    if v2 ~= nil and Vayne.Condemn.Heros[unit.charName]:Value() then
+                        myHero:CastSpell(2, unit)
+                    end
+                end
+            end
+        end
+    end
 
 end
 
@@ -103,7 +221,7 @@ function Condemn()
     if (Estun or Etoggle) and Eready then
         for i=1, Game.HeroCount() do
             local hero = Game.Hero(i)
-            if hero and hero.valid and not hero.dead and hero.team ~= myHero.team and hero.isTargetable and math.abs(hero.x - myHero.x) < 1000 and math.abs(hero.z - myHero.z) < 1000 and myHero:DistanceTo(hero) <= 550 then
+            if hero and hero.valid and not hero.dead and hero.team ~= myHero.team and hero.isTargetable and math.abs(hero.x - myHero.x) < 1000 and math.abs(hero.z - myHero.z) < 1000 and myHero:DistanceTo(hero) <= 550 and not Vayne.Condemn.Heros[hero.charName]:Value() then
                 local predictedPos = positionAfter(getWayPoints(hero), 0.25 + myHero:DistanceTo(hero) / 1600, hero.ms)
                 local afterKnock = predictedPos + 300 * (predictedPos - myHero.pos:To2D()):Normalize()
                 if Game.IsWall(Geometry.Vector3(afterKnock.x, myHero.y, afterKnock.y)) then
@@ -116,7 +234,7 @@ end
 
 function TumbleWall()
 
-    if Keyboard.KeysDown(Vayne.Misc.Wall.Drake:Value()) and myHero.x < 11540 or myHero.x > 11600 or myHero.z < 4638 or myHero.z > 4712 then
+    if Keyboard.KeysDown(Vayne.Misc.Drake:Value()) and myHero.x < 11540 or myHero.x > 11600 or myHero.z < 4638 or myHero.z > 4712 then
         myHero:Move(11590.95, 4656.26)
     else
         myHero:Move(11590.95, 4656.26)
@@ -165,31 +283,42 @@ function Checks()
     Eready = (myHero:CanUseSpell(2) == 0)
     Rready = (myHero:CanUseSpell(3) == 0)
 
-    Qcombo = Vayne.Combo.Combo.Quse:Value()
+    Qcombo = Vayne.Combo.Quse:Value()
     --Rcombo = Vayne.Combo.Combo.Ruse:Value()
 
-    --QFarm = Vayne.Farm.LaneClear.Quse:Value()
+    QFarm = Vayne.Farm.Quse:Value()
 
-    AutoCarry = Keyboard.KeysDown(Vayne.Keys.AutoCarry:Value())
-    MixedMode = Keyboard.KeysDown(Vayne.Keys.MixedMode:Value())
-    LaneClear = Keyboard.KeysDown(Vayne.Keys.LaneClear:Value())
-    LastHit = Keyboard.KeysDown(Vayne.Keys.LastHit:Value())
+    AutoCarry = Keyboard.KeysDown(Vayne.AutoCarry:Value())
+    MixedMode = Keyboard.KeysDown(Vayne.MixedMode:Value())
+    LaneClear = Keyboard.KeysDown(Vayne.LaneClear:Value())
+    LastHit = Keyboard.KeysDown(Vayne.LastHit:Value())
 
-    Etoggle = Vayne.Condemn.Settings.Toggle:Value()
-    Estun = Keyboard.KeysDown(Vayne.Condemn.Settings.Condemn:Value())
+    Etoggle = Vayne.Condemn.Toggle:Value()
+    Estun = Keyboard.KeysDown(Vayne.Condemn.Condemn:Value())
 
 
+end
+
+function VectorPointProjectionOnLineSegment(v1, v2, v)
+    assert(v1 and v2 and v, "VectorPointProjectionOnLineSegment: wrong argument types (3 <Vector> expected)")
+    local cx, cy, ax, ay, bx, by = v.x, (v.z or v.y), v1.x, (v1.z or v1.y), v2.x, (v2.z or v2.y)
+    local rL = ((cx - ax) * (bx - ax) + (cy - ay) * (by - ay)) / ((bx - ax) ^ 2 + (by - ay) ^ 2)
+    local pointLine = { x = ax + rL * (bx - ax), y = ay + rL * (by - ay) }
+    local rS = rL < 0 and 0 or (rL > 1 and 1 or rL)
+    local isOnSegment = rS == rL
+    local pointSegment = isOnSegment and pointLine or { x = ax + rS * (bx - ax), y = ay + rS * (by - ay) }
+    return pointSegment, pointLine, isOnSegment
 end
 
 function OnDraw()
 
     if Vayne.Draw.Enable:Value() then
         -- Skills --
-        if (Vayne.Draw.Skills.Edraw:Value()) and Eready then
+        if (Vayne.Draw.Edraw:Value()) and Eready then
             Graphics.DrawCircle(myHero, Erange, Color.White)
         end
         -- Items --
-        if (Vayne.Draw.Items.Bilgewater:Value()) or (Vayne.Draw.Items.Botrk:Value()) then
+        if (Vayne.Draw.Bilgewater:Value()) or (Vayne.Draw.Botrk:Value()) then
             Graphics.DrawCircle(myHero, 450, Color.White)
         end
     end
