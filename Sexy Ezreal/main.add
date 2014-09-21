@@ -1,0 +1,288 @@
+local SpellQ = { Range = 1100, Width = 60, Speed = 2000, Delay = 0.25, mCollision = true, hCollision = true }
+local SpellW = { Range = 1000, Width = 60, Speed = 2000, Delay = 0.25, mCollision = false, hCollision = false }
+local SpellR = { Range = 20000, Width = 160, Speed = 2000, Delay = 1, mCollision = false, hCollision = false }
+
+Callback.Bind('Load', function()
+    
+    Callback.Bind('GameStart', function() OnGameStart() end)
+
+end)
+
+function OnGameStart()
+    if myHero.charName ~= 'Ezreal' then return end
+
+    trueRange = myHero.range + myHero.boundingRadius
+
+    Color = { Red = Graphics.ARGB(0xFF,0xFF,0,0),
+            Green = Graphics.ARGB(0xFF,0,0xFF,0),
+            Blue = Graphics.ARGB(0xFF,0,0,0xFF),
+            White = Graphics.ARGB(0xFF,0xFF,0xFF,0xFF)
+            }
+
+     Ezreal = AddonConfig('Ezreal') {
+        Combo = AddonConfig.Menu('Combo') {
+            Combo = AddonConfig.Section("Abilities Config"),
+            Quse = AddonConfig.Boolean("Use Q - Mystic Shot", true),
+            Wuse = AddonConfig.Boolean("Use W - Essence Flux", true),
+            Ruse = AddonConfig.Boolean("Use R - Trueshot Barrage", true),
+        },
+        Harass = AddonConfig.Menu('Harass/Mixed Mode') {
+            Quse = AddonConfig.Boolean("Use Q - Mystic Shot", true),
+            Wuse = AddonConfig.Boolean("Use W - Essence Flux", true),
+            Config = AddonConfig.Section("Skills Config"),
+            Mana = AddonConfig.Number("Min Mana (0-100%) ", 75),
+        },
+        Farm = AddonConfig.Menu('Farm Settings') {
+            LastHit = AddonConfig.Section("Last Hit"),
+            Quse1 = AddonConfig.Boolean("Use Q - Mystic Shot", true),
+
+            LaneClear = AddonConfig.Section("Lane Clear"),
+            Quse2 = AddonConfig.Boolean("Use Q - Mystic Shot", true),
+
+        },
+        Ks = AddonConfig.Menu('Kill Steal') {
+            Quse = AddonConfig.Boolean("Q - Mystic Shot", true),
+            Wuse = AddonConfig.Boolean("W - Essence Flux", false),
+            Ruse = AddonConfig.Boolean("R - Arcane Shift", false),
+        },
+        Draw = AddonConfig.Menu('Draw Settings') {
+          Enable = AddonConfig.Boolean("Enable Drawings", true),
+          Prediction = AddonConfig.Boolean("Draw Prediction", true),
+            Abilities = AddonConfig.Section("Abilities Range"),
+              Qdraw = AddonConfig.Boolean("Q - Mystic Shot", false),
+              Wdraw = AddonConfig.Boolean("W - Essence Flux", false),
+              Edraw = AddonConfig.Boolean("E - Arcane Shift", false),
+
+            --Colors = AddonConfig.Section("Colors"),
+            --Colors2 = AddonConfig.Number("Colors(White, Blue, Red, Green) ", 1),
+
+        },
+        Keyss = AddonConfig.Section("Keys"),
+        AutoCarry = AddonConfig.KeyBinding('Combo', 'SPACE'),
+        MixedMode = AddonConfig.KeyBinding('Harass', 'C'),
+        LaneClear = AddonConfig.KeyBinding('LaneClear', 'V'),
+        LastHit = AddonConfig.KeyBinding('LastHit', 'X'),
+        Keys = AddonConfig.Section("Misc"),
+        E = AddonConfig.KeyBinding('E - Arcane Shift', 'A'),
+
+    }
+
+    MenuSave:Load(Ezreal)
+
+    Game.Chat.Print("<font color=\"#48DA2A\">Sexy Ezreal: </b></font> <font color=\"#CFCDCD\">Version 1.0 loaded</b></font>")
+
+    Callback.Bind('Draw', function() OnDraw() end)
+    Callback.Bind('Tick', function() OnTick() end)
+
+end
+
+
+
+function OnTick()
+  Checks()
+  CastE()
+  Farm()
+  Ks()
+
+  Qtarget = GetTarget()
+
+  SxOrb:EnableAttacks()
+  SxOrb:ForceTarget(Qtarget)
+  Target = SxOrb:GetTarget()
+
+  if AutoCarry then
+    Combo(Target)
+    --CastR(unit)
+  end
+
+  if MixedMode then
+    Harass(Target)
+  end
+
+end
+
+function Combo(unit)
+  if unit ~= nil and unit.type == myHero.type and unit.team == TEAM_ENEMY and not unit.dead then
+    if Qcombo and myHero:DistanceTo(unit) < SpellQ.Range and Qready then
+      local PPos, HC  = Prediction.GetPredictedPosition(unit, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)  
+      if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
+        SxOrbWalk:ResetAA()
+        myHero:CastSpell(0, PPos.x, PPos.z)
+      end
+    end
+    if Wcombo and myHero:DistanceTo(unit) < SpellW.Range and Wready then
+      local PPos, HC  = Prediction.GetPredictedPosition(unit, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero)
+      if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
+        SxOrbWalk:ResetAA()
+        myHero:CastSpell(1, PPos.x, PPos.z)
+      end
+    end
+  end
+end
+
+function Harass(unit)
+  if unit ~= nil and unit.type == myHero.type and unit.team == TEAM_ENEMY and not unit.dead then
+    if QHarass and myHero:DistanceTo(unit) < SpellQ.Range and Qready and myHero.mana > (myHero.maxMana*(Ezreal.Harass.Mana:Value()/100)) then
+      local PPos, HC  = Prediction.GetPredictedPosition(unit, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero) 
+      if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
+        SxOrbWalk:ResetAA()
+        myHero:CastSpell(0, PPos.x, PPos.z)
+      end
+    end
+    if WHarass and myHero:DistanceTo(unit) < SpellW.Range and Wready and myHero.mana > (myHero.maxMana*(Ezreal.Harass.Mana:Value()/100)) then
+      local PPos, HC  = Prediction.GetPredictedPosition(unit, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero) 
+      if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
+        SxOrbWalk:ResetAA()
+        myHero:CastSpell(1, PPos.x, PPos.z)
+      end
+    end
+  end
+
+end
+
+--[[
+function CastR(unit)
+  for i = 1, Game.HeroCount() do
+    unit = Game.Hero(i)
+    if unit ~= nil and unit.type == myHero.type and unit.team == TEAM_ENEMY and not unit.dead then
+      if Rready and Rcombo then
+        local PPos, HC  = GetBestAoEPosition(SpellR.Range, SpellR.Speed, SpellR.Delay, SpellR.Width, SpellR.mCollisio, SpellR.hCOllsion, myHero)
+
+end ]]
+
+function Ks()
+  for i = 1, Game.HeroCount() do
+    hero = Game.Hero(i)
+    local Qdmg = myHero:CalcDamage(hero, ((5*(4 * myHero:GetSpellData(0).level + 3)) + myHero.totalDamage + (myHero.ap*0.4)))
+    local Wdmg = myHero:CalcDamage(hero, (37.5*(myHero:GetSpellData(1).level + 1) + myHero.totalDamage + (myHero.ap*0.8)))
+    local Rdmg = myHero:CalcDamage(hero, (150*(myHero:GetSpellData(3).level + 1) + myHero.totalDamage + (myHero.ap*0.75)))
+      if hero ~= nil and hero.type == myHero.type and hero.team == TEAM_ENEMY and not hero.dead then
+        if Qready and hero.health < Qdmg and myHero:DistanceTo(hero) < SpellQ.Range and QKs then
+          local PPos, HC  = Prediction.GetPredictedPosition(hero, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)
+          if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
+            myHero:CastSpell(0, PPos.x, PPos.z)
+          end 
+        elseif Wready and hero.health < Wdmg and myHero:DistanceTo(hero) < SpellW.Range and WKs then
+          local PPos, HC  = Prediction.GetPredictedPosition(hero, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero)
+          if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
+            myHero:CastSpell(1, PPos.x, PPos.z)
+          end  
+        elseif Rready and hero.health < Rdmg and myHero:DistanceTo(hero) < 2000 and myHero:DistanceTo(hero) > SpellQ.Range and RKs then
+          local PPos, HC  = Prediction.GetPredictedPosition(hero, SpellR.Range, SpellR.Speed, SpellR.Delay, SpellR.Width, SpellR.mCollisio, SpellR.hCOllsion, myHero)
+          if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
+            myHero:CastSpell(3, PPos.x, PPos.z)
+          end 
+        end
+      end
+  end
+
+end
+
+function Farm()
+
+  if ((Ezreal.Farm.Quse1:Value()) and LastHit) then 
+    for minion in Object.Minions do
+      local Qdmg = myHero:CalcDamage(minion, ((20 * myHero:GetSpellData(0).level + 15)) + myHero.totalDamage + (myHero.ap*0.4))
+      if minion.team == TEAM_ENEMY and minion.health < Qdmg and minion.health > 0 and Qready and myHero:DistanceTo(minion) < SpellQ.Range then
+          myHero:CastSpell(0, minion.x, minion.z)
+      end
+    end
+  end
+  if ((Ezreal.Farm.Quse2:Value()) and LaneClear) then 
+    for minion in Object.Minions do
+      local Qdmg = myHero:CalcDamage(minion, ((20 * myHero:GetSpellData(0).level + 15)) + myHero.totalDamage + (myHero.ap*0.4))
+      if minion.team == TEAM_ENEMY and minion.health < Qdmg and minion.health > 0 and Qready and myHero:DistanceTo(minion) < SpellQ.Range then
+          myHero:CastSpell(0, minion.x, minion.z)
+      end
+    end
+  end
+end
+
+function CastE()
+
+  if Eready and Wready and E then
+    myHero:CastSpell(1, mousePos.x, mousePos.z)
+    myHero:CastSpell(2, mousePos.x, mousePos.z)
+  end
+
+end
+
+function Checks()
+
+    Qready = myHero:CanUseSpell(0)
+    Wready = myHero:CanUseSpell(1)
+    Eready = myHero:CanUseSpell(2)
+    Rready = myHero:CanUseSpell(3)
+
+    Qcombo = Ezreal.Combo.Quse:Value()
+    Wcombo = Ezreal.Combo.Wuse:Value()
+    Rcombo = Ezreal.Combo.Ruse:Value()
+
+    QHarass = Ezreal.Harass.Quse:Value()
+    WHarass = Ezreal.Harass.Wuse:Value()
+
+    QKs = Ezreal.Ks.Quse:Value()
+    WKs = Ezreal.Ks.Wuse:Value()
+    RKs = Ezreal.Ks.Ruse:Value()
+
+    AutoCarry = Keyboard.KeysDown(Ezreal.AutoCarry:Value())
+    MixedMode = Keyboard.KeysDown(Ezreal.MixedMode:Value())
+    LaneClear = Keyboard.KeysDown(Ezreal.LaneClear:Value())
+    LastHit = Keyboard.KeysDown(Ezreal.LastHit:Value())
+    E = Keyboard.KeysDown(Ezreal.E:Value())
+    --[[
+    if tonumber(Ezreal.Draw.Colors.Colors:Value() == 2) then
+        DrawColor = Color.Blue
+    elseif tonumber(Ezreal.Draw.Colors.Colors:Value() == 3) then
+        DrawColor = Color.Red
+    elseif tonumber(Ezreal.Draw.Colors.Colors:Value() == 4) then
+        DrawColor = Color.Green
+    else
+        DrawColor = Color.White
+    end]]
+
+end
+
+function OnDraw()
+
+    if Ezreal.Draw.Enable:Value() then
+        if (Ezreal.Draw.Qdraw:Value()) then
+            Graphics.DrawCircle(myHero, SpellQ.Range, Color.White)
+        end
+        if (Ezreal.Draw.Wdraw:Value()) then
+            Graphics.DrawCircle(myHero, SpellW.Range, Color.White)
+        end
+        if (Ezreal.Draw.Edraw:Value()) then
+            Graphics.DrawCircle(myHero, 475, Color.White)
+        end
+    end
+
+    if Ezreal.Draw.Prediction:Value() then
+      for i = 1, Game.HeroCount() do
+        local Target = Game.Hero(i)
+        if Target and Target.valid and Target.visible and Target.team == TEAM_ENEMY and not Target.dead then
+            local PPos, HC  = Prediction.GetPredictedPosition(Target, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)
+            if PPos and PPos.x and PPos.y and PPos.z and HC ~= 0 then
+                Graphics.DrawCircle(PPos.x, PPos.y, PPos.z, Target.boundingRadius, Graphics.ARGB(0xFF,0,0,0xFF))
+            end            
+        end
+      end
+    end
+end
+
+function GetTarget()
+  local selected, result = nil, math.huge
+  for i = 1, Game.HeroCount() do
+    local hero = Game.Hero(i)
+    if hero and hero.valid and hero.visible and not hero.dead and hero.isTargetable and hero.team == TEAM_ENEMY then
+      if myHero.pos:To2D():DistanceTo(hero.pos:To2D()) - hero.boundingRadius < SpellQ.Range then
+        local value = hero.health / (hero.ap + (hero.totalDamage * hero.attackSpeed))
+        if value < result then
+          result = value
+          selected = hero
+        end
+      end
+    end
+  end
+  return selected
+end
