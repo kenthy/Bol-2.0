@@ -67,7 +67,7 @@ function OnGameStart()
 
     }
 
-    MenuSave:Load(Ezreal)
+    --MenuSave:Load(Ezreal)
 
     Game.Chat.Print("<font color=\"#48DA2A\">Sexy Ezreal: </b></font> <font color=\"#CFCDCD\">Version 1.0 loaded</b></font>")
 

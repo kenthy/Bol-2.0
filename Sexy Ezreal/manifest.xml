@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest>
     <id>a2b812863210336e5d47dc6734613ecf</id>
+    <icon>/resource/cloudrop.gui/images/drop.png</icon>
     <name>Sexy Ezreal</name>
     <type>ADDON</type>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <author>Woody</author>
     <description></description>
-    <requirements>3b0d5f89a6177446bd80f7a357d3f541</requirements>
+    <builtin></builtin>
+    <requirements>3b0d5f89a6177446bd80f7a357d3f541 86a333c63064f17382b3e38c59bf91ef 2a8769d6c0c348d63093a8f5fad93b72</requirements>
 </manifest>
