@@ -1,6 +1,26 @@
 local AArange, Qrange, Erange, Rrange = 125, 650, 425, 1000
 local Qtarget = nil
 
+local spells = 
+    {
+        {name = "CaitlynAceintheHole", menuname = "Caitlyn (R)"},
+        {name = "Crowstorm", menuname = "Fiddlesticks (R)"},
+        {name = "DrainChannel", menuname = "Fiddlesticks (W)"},
+        {name = "GalioIdolOfDurand", menuname = "Galio (R)"},
+        {name = "KatarinaR", menuname = "Katarina (R)"},
+        {name = "InfiniteDuress", menuname = "WarWick (R)"},
+        {name = "AbsoluteZero", menuname = "Nunu (R)"},
+        {name = "MissFortuneBulletTime", menuname = "Miss Fortune (R)"},
+        {name = "AlZaharNetherGrasp", menuname = "Malzahar (R)"},
+        {name = "PantheonRJump", menuname = "Pantheon (R Cast)"},
+        {name = "PantheonRFall", menuname = "Pantheon (R Fall)"},
+        {name = "ShenStandUnited", menuname = "Shen (R)"},
+        {name = "UrgotSwap2", menuname = "Urgot (R)"},
+        {name = "VarusQ", menuname = "Varus (Q)"},
+        {name = "VelkozR", menuname = "Vel'Koz (R)"},
+        {name = "FallenOne", menuname = "Karthus (R)"},
+    }
+
 Callback.Bind('Load', function()
 	
 	Callback.Bind('GameStart', function() OnGameStart() end)
@@ -41,6 +61,13 @@ function OnGameStart()
             Quse = AddonConfig.Boolean("Q - Bladesurge", true),
             Euse = AddonConfig.Boolean("E - Equilibrium Strike", false),
         },
+
+        Interrupt = AddonConfig.Menu('Auto-Interrupt') {
+            Enable = AddonConfig.Boolean("Enabled", true),
+            Quse = AddonConfig.Boolean("Use Q to get to the target", true),
+            Settings = AddonConfig.Section("Skill Settings"),
+        },
+
 		Draw = AddonConfig.Menu('Draw Settings') {
             Enable = AddonConfig.Boolean("Enable Drawings", true), 
                 Abilities = AddonConfig.Section("Abilities Range") {
@@ -67,10 +94,15 @@ function OnGameStart()
         }
 	}
 
-    Game.Chat.Print("<font color=\"#48DA2A\">Neo Assault Irelia: </b></font> <font color=\"#CFCDCD\">Version 1.0 loaded</b></font>")
+    for i, spell in pairs(spells) do
+        Irelia.Interrupt.Settings:Add(AddonConfig.Boolean(spell.menuname, true):Id(spell.name))
+    end
+
+    Game.Chat.Print("<font color=\"#48DA2A\">Neo Assault Irelia: </b></font> <font color=\"#CFCDCD\">Version 1.01 loaded</b></font>")
 
 	Callback.Bind('Draw', function() OnDraw() end)
 	Callback.Bind('Tick', function() OnTick() end)
+    Callback.Bind('ProcessSpell', function(unit, spell) OnProcessSpell(unit, spell) end)
 
 
 end
@@ -197,6 +229,25 @@ function Ks()
 
 end
 
+function OnProcessSpell(unit, spell)
+    if Irelia.Interrupt.Enable:Value() and Eready then
+        local SpellT = spell.target
+        if unit.team == TEAM_ENEMY and myHero:DistanceTo(unit) < Qrange and unit.type == myHero.type and SpellT.type == myHero.type then
+            if (myHero.health / myHero.maxHealth) < (unit.health / unit.maxHealth) then
+                for i, spell in ipairs(spells) do
+                    if Irelia.Interrupt.Settings[spell.name] then
+                        local name = spell.name
+                        for i = 1, #spells do
+                            if name == spells[i].name then
+                                myHero:CastSpell(2, unit)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
 
 -- Honda7 --
 function GetBestTarget(Range)

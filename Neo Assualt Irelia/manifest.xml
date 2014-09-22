@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+    <id>38b5434f63435bc2ac73902fc51b6a85</id>
+    <icon>/resource/cloudrop.gui/images/drop.png</icon>
+    <name>Neo Assualt Irelia</name>
+    <type>ADDON</type>
+    <version>1.0.1</version>
+    <author>Woody</author>
+    <description>
+	Neo Assault Irelia
+
+	Smart Combo
+		-Fully Configurable
+		-Orbwalking (SxOrbWalk)
+
+	Auto-Interrupt
+		-Fully Configurable
+
+	Last Hit Mode
+		-Option to use Q
+
+	Lane Clear
+		-Option to use Q
+
+	Drawings
+		-Abilities
+		-Items
+    </description>
+    <builtin></builtin>
+    <requirements>3b0d5f89a6177446bd80f7a357d3f541</requirements>
+</manifest>
