@@ -140,7 +140,7 @@ function OnGameStart()
         end
     end
 
-    Game.Chat.Print("<font color=\"#E31919\"><b>Bat Vayne: </b></font><font color=\"#000000\">Version 1.02 loaded</b></font>")
+    Game.Chat.Print("<font color=\"#E31919\"><b>Bat Vayne: </b></font><font color=\"#000000\">Version 1.03 loaded</b></font>")
 
     Callback.Bind('Draw', function() OnDraw() end)
     Callback.Bind('Tick', function() OnTick() end)
@@ -152,8 +152,6 @@ end
 function OnTick()
     Checks()
     Condemn()
-
-    --Target = SxOrb:GetTarget()
     
     if Keyboard.KeysDown(Vayne.Misc.Drake:Value()) then
         TumbleWall()
@@ -171,7 +169,8 @@ function OnProcessSpell(unit, spell)
     end
 
     if Vayne.Interrupt.Enable:Value() and Eready then
-        if unit.team == TEAM_ENEMY and myHero:DistanceTo(unit) < Erange then
+        local SpellT = spell.target
+        if unit.team == TEAM_ENEMY and myHero:DistanceTo(unit) < Erange and SpellT.type == myHero.type and unit.type == myHero.type then
             for i, spell in ipairs(spells) do
                 if Vayne.Interrupt.Settings[spell.name] then
                     local name = spell.name
@@ -185,15 +184,12 @@ function OnProcessSpell(unit, spell)
         end
     end
 
-    --[[ if unit.isMe and spell.name:lower():find("attack") and LaneClear then
-        local SpellT = spell.target
-        if SpellT.type == myHero.type then
-            Utility.DelayAction(function() myHero:CastSpell(0, mousePos.x, mousePos.z) end, spell.windUpTime*1000 + Game.Latency())
-        end
-    end]]
+    if unit.isMe and spell.name:lower():find("attack") and LaneClear then
+        Utility.DelayAction(function() myHero:CastSpell(0, mousePos.x, mousePos.z) end, spell.windUpTime*1000 + Game.Latency())  
+    end
 
     if Vayne.Condemn.GapCloser:Value() and Eready then
-        if unit.team == TEAM_ENEMY then
+        if unit.team == TEAM_ENEMY and unit.type == myHero.type then
             if GapCloserTarget[spell.name] and myHero:DistanceTo(unit) < Erange then
                 if spell.target and spell.target.name == myHero.name and Vayne.Condemn.Heros[unit.charName]:Value() then
                     myHero:CastSpell(2, unit)
@@ -299,6 +295,7 @@ function Checks()
 
 end
 
+-- AllClass
 function VectorPointProjectionOnLineSegment(v1, v2, v)
     assert(v1 and v2 and v, "VectorPointProjectionOnLineSegment: wrong argument types (3 <Vector> expected)")
     local cx, cy, ax, ay, bx, by = v.x, (v.z or v.y), v1.x, (v1.z or v1.y), v2.x, (v2.z or v2.y)
