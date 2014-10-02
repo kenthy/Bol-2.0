@@ -1,10 +1,14 @@
 local SpellQ = { Range = 1100, Width = 60, Speed = 2000, Delay = 0.25, mCollision = true, hCollision = true }
 local SpellW = { Range = 1000, Width = 60, Speed = 2000, Delay = 0.25, mCollision = false, hCollision = false }
 local SpellR = { Range = 20000, Width = 160, Speed = 2000, Delay = 1, mCollision = false, hCollision = false }
+local blitzChamp = nil
+local grabbed = false
+local grab = nil
+local BCTConfig = nil
 
 Callback.Bind('Load', function()
-    
-    Callback.Bind('GameStart', function() OnGameStart() end)
+
+  Callback.Bind('GameStart', function() OnGameStart() end)
 
 end)
 
@@ -24,7 +28,7 @@ function OnGameStart()
             Combo = AddonConfig.Section("Abilities Config"),
             Quse = AddonConfig.Boolean("Use Q - Mystic Shot", true),
             Wuse = AddonConfig.Boolean("Use W - Essence Flux", true),
-            Ruse = AddonConfig.Boolean("Use R - Trueshot Barrage", true),
+            --Ruse = AddonConfig.Boolean("Use R - Trueshot Barrage", true),
         },
         Harass = AddonConfig.Menu('Harass/Mixed Mode') {
             Quse = AddonConfig.Boolean("Use Q - Mystic Shot", true),
@@ -45,6 +49,14 @@ function OnGameStart()
             Wuse = AddonConfig.Boolean("W - Essence Flux", false),
             Ruse = AddonConfig.Boolean("R - Arcane Shift", false),
         },
+        Orbwalk = AddonConfig.Menu('Orbwalk') {
+            Allclass = AddonConfig.Boolean("AllClass Orbwalk", true),
+            SxOrb = AddonConfig.Boolean("SxOrbWalk", false),
+            Jorj = AddonConfig.Boolean("Jorj's Orbwalk", false),
+        },
+        Misc = AddonConfig.Menu('Misc') {
+            Dodge = AddonConfig.Boolean("Dodge Blitz Grab with E", true),
+        },
         Draw = AddonConfig.Menu('Draw Settings') {
           Enable = AddonConfig.Boolean("Enable Drawings", true),
           Prediction = AddonConfig.Boolean("Draw Prediction", true),
@@ -58,62 +70,106 @@ function OnGameStart()
 
         },
         Keyss = AddonConfig.Section("Keys"),
-        AutoCarry = AddonConfig.KeyBinding('Combo', 'SPACE'),
+        AutoCarry = AddonConfig.KeyBinding('Combo', 'A'),
         MixedMode = AddonConfig.KeyBinding('Harass', 'C'),
         LaneClear = AddonConfig.KeyBinding('LaneClear', 'V'),
         LastHit = AddonConfig.KeyBinding('LastHit', 'X'),
-        Keys = AddonConfig.Section("Misc"),
-        E = AddonConfig.KeyBinding('E - Arcane Shift', 'A'),
+        --Keys = AddonConfig.Section("Misc"),
+        --E = AddonConfig.KeyBinding('E - Arcane Shift', 'Z'),
 
     }
+    BasicPrediction.EnablePrediction()
 
-    --MenuSave:Load(Ezreal)
-
-    Game.Chat.Print("<font color=\"#48DA2A\">Sexy Ezreal: </b></font> <font color=\"#CFCDCD\">Version 1.0 loaded</b></font>")
+    Game.Chat.Print("<font color=\"#48DA2A\">Sexy Ezreal: </b></font> <font color=\"#CFCDCD\">Version 1.1 loaded</b></font>")
 
     Callback.Bind('Draw', function() OnDraw() end)
     Callback.Bind('Tick', function() OnTick() end)
+    Callback.Bind('Tick', function() Checks() end)
+    Callback.Bind('Tick', function() Dodge() end)
+    Callback.Bind('ProcessSpell', function(unit, spell) OnProcessSpell(unit, spell) end)
+    Callback.Bind('CreateObj', function(object) OnCreateObj(object) end)
+    Callback.Bind('DeleteObj', function(object) OnDeleteObj(object) end)
 
 end
 
 
 
 function OnTick()
-  Checks()
-  CastE()
+  --CastE()
   Farm()
   Ks()
 
-  Qtarget = GetTarget()
-
-  SxOrb:EnableAttacks()
-  SxOrb:ForceTarget(Qtarget)
-  Target = SxOrb:GetTarget()
+  if Ezreal.Orbwalk.Allclass:Value() then
+    if Ezreal.Orbwalk.SxOrb:Value() then Error() return end
+    if Ezreal.Orbwalk.Jorj:Value() then Error() return end
+    Target = GetTarget()
+    AllClass = true
+  elseif Ezreal.Orbwalk.SxOrb:Value() then
+    if Ezreal.Orbwalk.Allclass:Value() then Error() return end
+    if Ezreal.Orbwalk.Jorj:Value() then Error() return end
+    SxOrb:EnableAttacks()
+    Target = SxOrb:GetTarget()
+    SxOrb = true
+  elseif Ezreal.Orbwalk.Jorj:Value() then
+    if Ezreal.Orbwalk.SxOrb:Value() then Error() return end
+    if Ezreal.Orbwalk.Allclass:Value() then Error() return end
+    Target = GetTarget()
+    Jorj = true
+  end
 
   if AutoCarry then
+    if AllClass then Allclass.Orbwalk(Target) end
     Combo(Target)
-    --CastR(unit)
   end
 
   if MixedMode then
     Harass(Target)
   end
+  
+end
+
+function OnProcessSpell(unit, spell)
+
+    if unit.isMe and spell.name:lower():find("attack") then
+        local SpellT = spell.target
+        if SpellT.type == myHero.type then
+            Utility.DelayAction(function() CastQ() end, spell.windUpTime*1000 + Game.Latency())
+        end
+    end
 
 end
 
 function Combo(unit)
-  if unit ~= nil and unit.type == myHero.type and unit.team == TEAM_ENEMY and not unit.dead then
+  if unit ~= nil and unit.type == myHero.type and unit.team == TEAM_ENEMY and not unit.dead and myHero:DistanceTo(unit) > trueRange then
     if Qcombo and myHero:DistanceTo(unit) < SpellQ.Range and Qready then
-      local PPos, HC  = Prediction.GetPredictedPosition(unit, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)  
+      local PPos, HC  = BasicPrediction.GetPredictedPosition(unit, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)  
       if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
-        SxOrbWalk:ResetAA()
         myHero:CastSpell(0, PPos.x, PPos.z)
       end
     end
-    if Wcombo and myHero:DistanceTo(unit) < SpellW.Range and Wready then
-      local PPos, HC  = Prediction.GetPredictedPosition(unit, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero)
+    if Wcombo and myHero:DistanceTo(unit) < SpellW.Range and Wready and myHero:CanUseSpell(0) ~= Game.SpellState.READY then
+      local PPos, HC  = BasicPrediction.GetPredictedPosition(unit, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero) 
+      if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
+        myHero:CastSpell(1, PPos.x, PPos.z)
+      end
+    end
+  end
+end
+
+function CastQ()
+  local Target = GetTarget()
+
+  if Target ~= nil and Target.type == myHero.type and Target.team == TEAM_ENEMY and not Target.dead then
+    if Qcombo and myHero:DistanceTo(Target) < SpellQ.Range and Qready then
+      local PPos, HC  = BasicPrediction.GetPredictedPosition(Target, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)  
       if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
-        SxOrbWalk:ResetAA()
+        myHero:CastSpell(0, PPos.x, PPos.z)
+        --Allclass.Cast(0, true)
+      end
+    end
+    if Wcombo and myHero:DistanceTo(Target) < SpellW.Range and Wready and myHero:CanUseSpell(0) ~= Game.SpellState.READY then
+      local PPos, HC  = BasicPrediction.GetPredictedPosition(Target, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero) 
+      if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
         myHero:CastSpell(1, PPos.x, PPos.z)
       end
     end
@@ -123,14 +179,13 @@ end
 function Harass(unit)
   if unit ~= nil and unit.type == myHero.type and unit.team == TEAM_ENEMY and not unit.dead then
     if QHarass and myHero:DistanceTo(unit) < SpellQ.Range and Qready and myHero.mana > (myHero.maxMana*(Ezreal.Harass.Mana:Value()/100)) then
-      local PPos, HC  = Prediction.GetPredictedPosition(unit, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero) 
+      local PPos, HC  = BasicPrediction.GetPredictedPosition(unit, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero) 
       if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
-        SxOrbWalk:ResetAA()
         myHero:CastSpell(0, PPos.x, PPos.z)
       end
     end
     if WHarass and myHero:DistanceTo(unit) < SpellW.Range and Wready and myHero.mana > (myHero.maxMana*(Ezreal.Harass.Mana:Value()/100)) then
-      local PPos, HC  = Prediction.GetPredictedPosition(unit, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero) 
+      local PPos, HC  = BasicPrediction.GetPredictedPosition(unit, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero) 
       if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
         SxOrbWalk:ResetAA()
         myHero:CastSpell(1, PPos.x, PPos.z)
@@ -140,16 +195,6 @@ function Harass(unit)
 
 end
 
---[[
-function CastR(unit)
-  for i = 1, Game.HeroCount() do
-    unit = Game.Hero(i)
-    if unit ~= nil and unit.type == myHero.type and unit.team == TEAM_ENEMY and not unit.dead then
-      if Rready and Rcombo then
-        local PPos, HC  = GetBestAoEPosition(SpellR.Range, SpellR.Speed, SpellR.Delay, SpellR.Width, SpellR.mCollisio, SpellR.hCOllsion, myHero)
-
-end ]]
-
 function Ks()
   for i = 1, Game.HeroCount() do
     hero = Game.Hero(i)
@@ -158,17 +203,17 @@ function Ks()
     local Rdmg = myHero:CalcDamage(hero, (150*(myHero:GetSpellData(3).level + 1) + myHero.totalDamage + (myHero.ap*0.75)))
       if hero ~= nil and hero.type == myHero.type and hero.team == TEAM_ENEMY and not hero.dead then
         if Qready and hero.health < Qdmg and myHero:DistanceTo(hero) < SpellQ.Range and QKs then
-          local PPos, HC  = Prediction.GetPredictedPosition(hero, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)
+          local PPos, HC  = BasicPrediction.GetPredictedPosition(hero, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)
           if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
             myHero:CastSpell(0, PPos.x, PPos.z)
           end 
         elseif Wready and hero.health < Wdmg and myHero:DistanceTo(hero) < SpellW.Range and WKs then
-          local PPos, HC  = Prediction.GetPredictedPosition(hero, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero)
+          local PPos, HC  = BasicPrediction.GetPredictedPosition(hero, SpellW.Range, SpellW.Speed, SpellW.Delay, SpellW.Width, SpellW.mCollisio, SpellW.hCOllsion, myHero)
           if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
             myHero:CastSpell(1, PPos.x, PPos.z)
           end  
         elseif Rready and hero.health < Rdmg and myHero:DistanceTo(hero) < 2000 and myHero:DistanceTo(hero) > SpellQ.Range and RKs then
-          local PPos, HC  = Prediction.GetPredictedPosition(hero, SpellR.Range, SpellR.Speed, SpellR.Delay, SpellR.Width, SpellR.mCollisio, SpellR.hCOllsion, myHero)
+          local PPos, HC  = BasicPrediction.GetPredictedPosition(hero, SpellR.Range, SpellR.Speed, SpellR.Delay, SpellR.Width, SpellR.mCollisio, SpellR.hCOllsion, myHero)
           if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
             myHero:CastSpell(3, PPos.x, PPos.z)
           end 
@@ -197,26 +242,55 @@ function Farm()
     end
   end
 end
-
+--[[
 function CastE()
-
   if Eready and Wready and E then
-    myHero:CastSpell(1, mousePos.x, mousePos.z)
-    myHero:CastSpell(2, mousePos.x, mousePos.z)
+    --Allclass.Cast(W, mousePos, true)
+    Allclass.Cast(2, mousePos.x, mousePos.y, true)
   end
 
+end]]
+
+function Dodge()
+  for i = 1, Game.HeroCount() do
+    enemy = Game.Hero(i)
+    if enemy.team ~= player.team and enemy.charName == "Blitzcrank" then
+      blitzChamp = enemy
+    end
+  end
+  if grab ~= nil and grab:DistanceTo(myHero) < 500 and Ezreal.Misc.Dodge:Value() then
+    if math.abs((myHero.x-blitzChamp.x) * (grab.z - blitzChamp.z) - (myHero.z-blitzChamp.z) * (grab.x - blitzChamp.x)) < 39000 then
+      destX = myHero.x * 4 - blitzChamp.x*3
+      destZ = myHero.z * 4  - blitzChamp.z*3
+      myHero:CastSpell(2, destX, destZ)
+    end
+  end
+end
+
+function OnCreateObj(object)
+  if object.name:find("FistGrab") then
+    grabbed = true
+    grab = object
+  end
+end
+
+function OnDeleteObj(object)
+  if object.name:find("FistGrab") then
+    grabbed = false
+    grab = nil
+  end
 end
 
 function Checks()
 
-    Qready = myHero:CanUseSpell(0)
-    Wready = myHero:CanUseSpell(1)
-    Eready = myHero:CanUseSpell(2)
-    Rready = myHero:CanUseSpell(3)
+    Qready = myHero:CanUseSpell(0) == Game.SpellState.READY
+    Wready = myHero:CanUseSpell(1) == Game.SpellState.READY
+    Eready = myHero:CanUseSpell(2) == Game.SpellState.READY
+    Rready = myHero:CanUseSpell(3) == Game.SpellState.READY
 
     Qcombo = Ezreal.Combo.Quse:Value()
     Wcombo = Ezreal.Combo.Wuse:Value()
-    Rcombo = Ezreal.Combo.Ruse:Value()
+    --Rcombo = Ezreal.Combo.Ruse:Value()
 
     QHarass = Ezreal.Harass.Quse:Value()
     WHarass = Ezreal.Harass.Wuse:Value()
@@ -229,17 +303,7 @@ function Checks()
     MixedMode = Keyboard.KeysDown(Ezreal.MixedMode:Value())
     LaneClear = Keyboard.KeysDown(Ezreal.LaneClear:Value())
     LastHit = Keyboard.KeysDown(Ezreal.LastHit:Value())
-    E = Keyboard.KeysDown(Ezreal.E:Value())
-    --[[
-    if tonumber(Ezreal.Draw.Colors.Colors:Value() == 2) then
-        DrawColor = Color.Blue
-    elseif tonumber(Ezreal.Draw.Colors.Colors:Value() == 3) then
-        DrawColor = Color.Red
-    elseif tonumber(Ezreal.Draw.Colors.Colors:Value() == 4) then
-        DrawColor = Color.Green
-    else
-        DrawColor = Color.White
-    end]]
+    --E = Keyboard.KeysDown(Ezreal.E:Value())
 
 end
 
@@ -261,7 +325,7 @@ function OnDraw()
       for i = 1, Game.HeroCount() do
         local Target = Game.Hero(i)
         if Target and Target.valid and Target.visible and Target.team == TEAM_ENEMY and not Target.dead then
-            local PPos, HC  = Prediction.GetPredictedPosition(Target, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)
+            local PPos, HC  = BasicPrediction.GetPredictedPosition(Target, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)
             if PPos and PPos.x and PPos.y and PPos.z and HC ~= 0 then
                 Graphics.DrawCircle(PPos.x, PPos.y, PPos.z, Target.boundingRadius, Graphics.ARGB(0xFF,0,0,0xFF))
             end            
@@ -270,12 +334,26 @@ function OnDraw()
     end
 end
 
+function Error()
+    print("Error! You Picked two Orbwalks!")
+    return
+end
+
+-- Jorj Credits -- 
 function GetTarget()
   local selected, result = nil, math.huge
   for i = 1, Game.HeroCount() do
     local hero = Game.Hero(i)
+    -- Check if hero is a valid target
     if hero and hero.valid and hero.visible and not hero.dead and hero.isTargetable and hero.team == TEAM_ENEMY then
-      if myHero.pos:To2D():DistanceTo(hero.pos:To2D()) - hero.boundingRadius < SpellQ.Range then
+      -- Check if hero is within our true range
+      if myHero:DistanceTo(hero.visionPos) - hero.boundingRadius < trueRange then
+        local value = hero.health / (hero.ap + (hero.totalDamage * hero.attackSpeed))
+        if value < result then
+          result = value
+          selected = hero
+        end
+      elseif myHero:DistanceTo(hero.visionPos) - hero.boundingRadius < SpellQ.Range then
         local value = hero.health / (hero.ap + (hero.totalDamage * hero.attackSpeed))
         if value < result then
           result = value
