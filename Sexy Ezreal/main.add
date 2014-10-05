@@ -22,65 +22,65 @@ function OnGameStart()
             Blue = Graphics.ARGB(0xFF,0,0,0xFF),
             White = Graphics.ARGB(0xFF,0xFF,0xFF,0xFF)
             }
+            
+  Ezreal = MenuConfig('Sexy Ezreal')
+    Ezreal:Icon('fa-user')
 
-     Ezreal = AddonConfig('Ezreal') {
-        Combo = AddonConfig.Menu('Combo') {
-            Combo = AddonConfig.Section("Abilities Config"),
-            Quse = AddonConfig.Boolean("Use Q - Mystic Shot", true),
-            Wuse = AddonConfig.Boolean("Use W - Essence Flux", true),
-            --Ruse = AddonConfig.Boolean("Use R - Trueshot Barrage", true),
-        },
-        Harass = AddonConfig.Menu('Harass/Mixed Mode') {
-            Quse = AddonConfig.Boolean("Use Q - Mystic Shot", true),
-            Wuse = AddonConfig.Boolean("Use W - Essence Flux", true),
-            Config = AddonConfig.Section("Skills Config"),
-            Mana = AddonConfig.Number("Min Mana (0-100%) ", 75),
-        },
-        Farm = AddonConfig.Menu('Farm Settings') {
-            LastHit = AddonConfig.Section("Last Hit"),
-            Quse1 = AddonConfig.Boolean("Use Q - Mystic Shot", true),
+    Ezreal:Menu('Combo', 'Combo')
+      Ezreal.Combo:Icon('fa-folder-o')
+      Ezreal.Combo:Section('SkillsConfig', 'Skills Config')  
+      Ezreal.Combo:Boolean('Quse', 'Use Q - Mystic Shot', true)
+      Ezreal.Combo:Boolean('Wuse', 'Use W - Essence Flux', true)
+      --Ezreal.Combo:Boolean('Ruse', 'Use R - Trueshot Barrage', false)
 
-            LaneClear = AddonConfig.Section("Lane Clear"),
-            Quse2 = AddonConfig.Boolean("Use Q - Mystic Shot", true),
+    Ezreal:Menu('Harass', 'Harass/Mixed Mode')
+      Ezreal.Harass:Icon('fa-folder-o') 
+      Ezreal.Harass:Boolean('Quse', 'Use Q - Mystic Shot', false)
+      Ezreal.Harass:Boolean('Wuse', 'Use W - Essence Flux', true)
+      Ezreal.Harass:Section('SkillsConfig', 'Skills Config') 
+      Ezreal.Harass:Slider('Mana', 'Min Mana(%)', 75, 0, 100)
 
-        },
-        Ks = AddonConfig.Menu('Kill Steal') {
-            Quse = AddonConfig.Boolean("Q - Mystic Shot", true),
-            Wuse = AddonConfig.Boolean("W - Essence Flux", false),
-            Ruse = AddonConfig.Boolean("R - Arcane Shift", false),
-        },
-        Orbwalk = AddonConfig.Menu('Orbwalk') {
-            Allclass = AddonConfig.Boolean("AllClass Orbwalk", true),
-            SxOrb = AddonConfig.Boolean("SxOrbWalk", false),
-            Jorj = AddonConfig.Boolean("Jorj's Orbwalk", false),
-        },
-        Misc = AddonConfig.Menu('Misc') {
-            Dodge = AddonConfig.Boolean("Dodge Blitz Grab with E", true),
-        },
-        Draw = AddonConfig.Menu('Draw Settings') {
-          Enable = AddonConfig.Boolean("Enable Drawings", true),
-          Prediction = AddonConfig.Boolean("Draw Prediction", true),
-            Abilities = AddonConfig.Section("Abilities Range"),
-              Qdraw = AddonConfig.Boolean("Q - Mystic Shot", false),
-              Wdraw = AddonConfig.Boolean("W - Essence Flux", false),
-              Edraw = AddonConfig.Boolean("E - Arcane Shift", false),
+    Ezreal:Menu('Farm', 'Farm')
+      Ezreal.Farm:Icon('fa-folder-o')
+      Ezreal.Farm:Section('LastHit', 'Last Hit') 
+      Ezreal.Farm:Boolean('Quse1', 'Use Q - Mystic Shot', true)
+      Ezreal.Farm:Section('LaneClear', 'Lane Clear') 
+      Ezreal.Farm:Boolean('Quse2', 'Use Q - Mystic Shot', true)
 
-            --Colors = AddonConfig.Section("Colors"),
-            --Colors2 = AddonConfig.Number("Colors(White, Blue, Red, Green) ", 1),
+    Ezreal:Menu('Ks', 'Kill Steal')
+      Ezreal.Ks:Icon('fa-github-alt')
+      Ezreal.Ks:Boolean('Quse', 'Use Q - Mystic Shot', true)
+      Ezreal.Ks:Boolean('Wuse', 'Use W - Essence Flux', false)
+      Ezreal.Ks:Boolean('Ruse', 'Use R - Trueshot Barrage', true)
 
-        },
-        Keyss = AddonConfig.Section("Keys"),
-        AutoCarry = AddonConfig.KeyBinding('Combo', 'A'),
-        MixedMode = AddonConfig.KeyBinding('Harass', 'C'),
-        LaneClear = AddonConfig.KeyBinding('LaneClear', 'V'),
-        LastHit = AddonConfig.KeyBinding('LastHit', 'X'),
-        --Keys = AddonConfig.Section("Misc"),
-        --E = AddonConfig.KeyBinding('E - Arcane Shift', 'Z'),
+    Ezreal:Menu('Misc', 'Misc')
+      Ezreal.Misc:Icon('fa-cog')
+      Ezreal.Misc:Boolean('Dodge', 'Dodge Blitz Grab with E', true) 
 
-    }
+    Ezreal:Menu('Draw', 'Drawings')
+      Ezreal.Draw:Boolean('Enable', 'Enable Drawings', true)
+      Ezreal.Draw:Boolean('Prediction', 'Draw Prediction', false)
+      Ezreal.Draw:Section('SkillRange', 'Skills Range') 
+      Ezreal.Draw:Boolean('Qdraw', 'Q - Mystic Shot')
+      Ezreal.Draw:Boolean('Wdraw', 'W - Essence Flux')
+      Ezreal.Draw:Boolean('Edraw', 'E - Arcane Shift')
+      Ezreal.Draw:Separator()
+      Ezreal.Draw:DropDown('Colors', 'Colors', 1, {'Red','Green','Blue','White'})
+      Ezreal.Draw:Icon('fa-pencil')
+
+    Ezreal:Separator()  
+
+    Ezreal:DropDown('Orbwalk','Orbwalk', 1, {'AllClass','SxOrbWalk','Jorj Orbwalk'})
+             
+    Ezreal:Section('Keys', 'Keys')
+    Ezreal:KeyBinding('AutoCarry', 'AutoCarry', 'SPACE')
+    Ezreal:KeyBinding('MixedMode', 'MixedMode', 'C')
+    Ezreal:KeyBinding('LaneClear', 'LaneClear', 'V')
+    Ezreal:KeyBinding('LastHit', 'LastHit', 'X')
+  
     BasicPrediction.EnablePrediction()
 
-    Game.Chat.Print("<font color=\"#48DA2A\">Sexy Ezreal: </b></font> <font color=\"#CFCDCD\">Version 1.1 loaded</b></font>")
+    Game.Chat.Print("<font color=\"#48DA2A\">Sexy Ezreal: </b></font> <font color=\"#CFCDCD\">Version 1.11 loaded</b></font>")
 
     Callback.Bind('Draw', function() OnDraw() end)
     Callback.Bind('Tick', function() OnTick() end)
@@ -92,40 +92,28 @@ function OnGameStart()
 
 end
 
-
-
 function OnTick()
-  --CastE()
   Farm()
   Ks()
-
-  if Ezreal.Orbwalk.Allclass:Value() then
-    if Ezreal.Orbwalk.SxOrb:Value() then Error() return end
-    if Ezreal.Orbwalk.Jorj:Value() then Error() return end
+  
+  if Ezreal.Orbwalk:Value() == 1 then
+    if AutoCarry then Allclass.Orbwalk(Target) end
     Target = GetTarget()
-    AllClass = true
-  elseif Ezreal.Orbwalk.SxOrb:Value() then
-    if Ezreal.Orbwalk.Allclass:Value() then Error() return end
-    if Ezreal.Orbwalk.Jorj:Value() then Error() return end
+  elseif Ezreal.Orbwalk:Value() == 2 then
     SxOrb:EnableAttacks()
     Target = SxOrb:GetTarget()
-    SxOrb = true
-  elseif Ezreal.Orbwalk.Jorj:Value() then
-    if Ezreal.Orbwalk.SxOrb:Value() then Error() return end
-    if Ezreal.Orbwalk.Allclass:Value() then Error() return end
-    Target = GetTarget()
-    Jorj = true
+  elseif Ezreal.Orbwalk:Value() == 3 then
+    Target = myOrbwalk:Target()
   end
 
   if AutoCarry then
-    if AllClass then Allclass.Orbwalk(Target) end
     Combo(Target)
   end
 
   if MixedMode then
     Harass(Target)
   end
-  
+
 end
 
 function OnProcessSpell(unit, spell)
@@ -142,8 +130,9 @@ end
 function Combo(unit)
   if unit ~= nil and unit.type == myHero.type and unit.team == TEAM_ENEMY and not unit.dead and myHero:DistanceTo(unit) > trueRange then
     if Qcombo and myHero:DistanceTo(unit) < SpellQ.Range and Qready then
+      local isCollision, CollisionObjects = BasicCollision.GetCollision(unit, myHero, 60)
       local PPos, HC  = BasicPrediction.GetPredictedPosition(unit, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)  
-      if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
+      if PPos and PPos.x and PPos.y and PPos.z and not isCollision and HC >= 1 then
         myHero:CastSpell(0, PPos.x, PPos.z)
       end
     end
@@ -157,12 +146,12 @@ function Combo(unit)
 end
 
 function CastQ()
-  local Target = GetTarget()
 
-  if Target ~= nil and Target.type == myHero.type and Target.team == TEAM_ENEMY and not Target.dead then
-    if Qcombo and myHero:DistanceTo(Target) < SpellQ.Range and Qready then
+  if Target ~= nil and Target.type == myHero.type and Target.team == TEAM_ENEMY and not Target.dead and AutoCarry then
+    if Qcombo and myHero:DistanceTo(Target) < SpellQ.Range and Qready  then
+      local isCollision, CollisionObjects = BasicCollision.GetCollision(Target, myHero, 60)
       local PPos, HC  = BasicPrediction.GetPredictedPosition(Target, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)  
-      if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
+      if PPos and PPos.x and PPos.y and PPos.z and not isCollision and HC >= 1 then
         myHero:CastSpell(0, PPos.x, PPos.z)
         --Allclass.Cast(0, true)
       end
@@ -179,8 +168,9 @@ end
 function Harass(unit)
   if unit ~= nil and unit.type == myHero.type and unit.team == TEAM_ENEMY and not unit.dead then
     if QHarass and myHero:DistanceTo(unit) < SpellQ.Range and Qready and myHero.mana > (myHero.maxMana*(Ezreal.Harass.Mana:Value()/100)) then
+      local isCollision, CollisionObjects = BasicCollision.GetCollision(Target, myHero, 60)
       local PPos, HC  = BasicPrediction.GetPredictedPosition(unit, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero) 
-      if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
+      if PPos and PPos.x and PPos.y and PPos.z and not isCollision and HC >= 2 then
         myHero:CastSpell(0, PPos.x, PPos.z)
       end
     end
@@ -201,10 +191,11 @@ function Ks()
     local Qdmg = myHero:CalcDamage(hero, ((5*(4 * myHero:GetSpellData(0).level + 3)) + myHero.totalDamage + (myHero.ap*0.4)))
     local Wdmg = myHero:CalcDamage(hero, (37.5*(myHero:GetSpellData(1).level + 1) + myHero.totalDamage + (myHero.ap*0.8)))
     local Rdmg = myHero:CalcDamage(hero, (150*(myHero:GetSpellData(3).level + 1) + myHero.totalDamage + (myHero.ap*0.75)))
-      if hero ~= nil and hero.type == myHero.type and hero.team == TEAM_ENEMY and not hero.dead then
+      if hero ~= nil and hero.type == myHero.type and hero.team == TEAM_ENEMY and not hero.dead and myHero:DistanceTo(hero) < 2000 then
         if Qready and hero.health < Qdmg and myHero:DistanceTo(hero) < SpellQ.Range and QKs then
+          local isCollision, CollisionObjects = BasicCollision.GetCollision(Target, myHero, 60)
           local PPos, HC  = BasicPrediction.GetPredictedPosition(hero, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)
-          if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
+          if PPos and PPos.x and PPos.y and PPos.z and not isCollision and HC >= 1 then
             myHero:CastSpell(0, PPos.x, PPos.z)
           end 
         elseif Wready and hero.health < Wdmg and myHero:DistanceTo(hero) < SpellW.Range and WKs then
@@ -212,7 +203,7 @@ function Ks()
           if PPos and PPos.x and PPos.y and PPos.z and HC >= 1 then
             myHero:CastSpell(1, PPos.x, PPos.z)
           end  
-        elseif Rready and hero.health < Rdmg and myHero:DistanceTo(hero) < 2000 and myHero:DistanceTo(hero) > SpellQ.Range and RKs then
+        elseif Rready and hero.health < Rdmg and myHero:DistanceTo(hero) > SpellQ.Range and RKs then
           local PPos, HC  = BasicPrediction.GetPredictedPosition(hero, SpellR.Range, SpellR.Speed, SpellR.Delay, SpellR.Width, SpellR.mCollisio, SpellR.hCOllsion, myHero)
           if PPos and PPos.x and PPos.y and PPos.z and HC >= 2 then
             myHero:CastSpell(3, PPos.x, PPos.z)
@@ -254,6 +245,7 @@ end]]
 function Dodge()
   for i = 1, Game.HeroCount() do
     enemy = Game.Hero(i)
+    if enemy.charName ~= "Blitzcrank" then return end
     if enemy.team ~= player.team and enemy.charName == "Blitzcrank" then
       blitzChamp = enemy
     end
@@ -299,25 +291,36 @@ function Checks()
     WKs = Ezreal.Ks.Wuse:Value()
     RKs = Ezreal.Ks.Ruse:Value()
 
-    AutoCarry = Keyboard.KeysDown(Ezreal.AutoCarry:Value())
-    MixedMode = Keyboard.KeysDown(Ezreal.MixedMode:Value())
-    LaneClear = Keyboard.KeysDown(Ezreal.LaneClear:Value())
-    LastHit = Keyboard.KeysDown(Ezreal.LastHit:Value())
+    AutoCarry = Ezreal.AutoCarry:IsPressed()
+    MixedMode = Ezreal.MixedMode:IsPressed()
+    LaneClear = Ezreal.LaneClear:IsPressed()
+    LastHit = Ezreal.LastHit:IsPressed()
     --E = Keyboard.KeysDown(Ezreal.E:Value())
 
 end
 
 function OnDraw()
 
+    if Ezreal.Draw.Colors:Value() == 1 then 
+      Cor = Color.Red
+    elseif Ezreal.Draw.Colors:Value() == 2 then
+      Cor = Color.Green
+    elseif Ezreal.Draw.Colors:Value() == 3 then
+      Cor = Color.Blue
+    elseif Ezreal.Draw.Colors:Value() == 4 then
+      Cor = Color.White
+    end
+
+
     if Ezreal.Draw.Enable:Value() then
         if (Ezreal.Draw.Qdraw:Value()) then
-            Graphics.DrawCircle(myHero, SpellQ.Range, Color.White)
+          Graphics.DrawCircle(myHero, 1100, Cor)
         end
         if (Ezreal.Draw.Wdraw:Value()) then
-            Graphics.DrawCircle(myHero, SpellW.Range, Color.White)
+          Graphics.DrawCircle(myHero, 1000, Cor)
         end
         if (Ezreal.Draw.Edraw:Value()) then
-            Graphics.DrawCircle(myHero, 475, Color.White)
+          Graphics.DrawCircle(myHero, 475, Cor)
         end
     end
 
@@ -327,16 +330,12 @@ function OnDraw()
         if Target and Target.valid and Target.visible and Target.team == TEAM_ENEMY and not Target.dead then
             local PPos, HC  = BasicPrediction.GetPredictedPosition(Target, SpellQ.Range, SpellQ.Speed, SpellQ.Delay, SpellQ.Width, SpellQ.mCollisio, SpellQ.hCOllsion, myHero)
             if PPos and PPos.x and PPos.y and PPos.z and HC ~= 0 then
-                Graphics.DrawCircle(PPos.x, PPos.y, PPos.z, Target.boundingRadius, Graphics.ARGB(0xFF,0,0,0xFF))
+                Graphics.DrawCircle(PPos.x, PPos.y, PPos.z, Target.boundingRadius, Cor)
             end            
         end
       end
     end
-end
 
-function Error()
-    print("Error! You Picked two Orbwalks!")
-    return
 end
 
 -- Jorj Credits -- 
